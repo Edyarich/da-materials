@@ -1,0 +1,55 @@
+Дана таблица salary.
+Напишите запрос, который найдет сотрудников с минимальной и максимальной зарплатой в своем департаменте. Если в департаменте несколько минимальных/максимальных зарплат, нужно вывести все.
+
+Ожидаемый формат ответа:
+```
+ department_id |  name   | salary 
+---------------+---------+--------
+             1 | Сотр_1  |  10000
+             1 | Сотр_2  |  50000
+             2 | Сотр_3  |  10000
+             2 | Сотр_4  |  10000
+             2 | Сотр_5  |  90000
+             2 | Сотр_6  |  90000
+```
+**Ограничения**: запрещено использовать HAVING, JOIN, связанные подзапросы (обращение в подзапросе к таблицам из внешнего запроса), LIMIT, UNION, UNION ALL, VALUES.
+
+```
+Query result:
++---------------+----------+--------+
+| department_id | name     | salary |
++---------------+----------+--------+
+| 1             | Михаил   | 15000  |
+| 1             | Эдуард   | 45000  |
+| 1             | Ольга    | 45000  |
+| 2             | Евгений  | 90000  |
+| 2             | Олег     | 30000  |
+| 3             | Сергей   | 15000  |
+| 3             | Григорий | 70000  |
++---------------+----------+--------+
+Affected rows: 7
+```
+
+```sql
+SELECT 
+    department_id,
+    name,
+    salary
+FROM salary
+WHERE 
+    (department_id, salary) IN (
+        SELECT 
+            department_id, 
+            max(salary) AS max_dep_salary
+        FROM salary
+        GROUP BY department_id    
+    )
+    OR (department_id, salary) IN (
+        SELECT 
+            department_id, 
+            min(salary) AS min_dep_salary
+        FROM salary
+        GROUP BY department_id  
+    )
+ORDER BY department_id
+```
